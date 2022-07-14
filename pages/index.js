@@ -1,9 +1,10 @@
-import Head from "next/head";
-import Image from "next/image";
-import { useRouter } from "next/router";
-import { useState } from "react";
+import Head from 'next/head';
+import Image from 'next/image';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
+import Sidebar from '../components/containers/sidebar/sidebar';
 
-const axios = require("axios").default;
+const axios = require('axios').default;
 
 function validateGeocodeData(geocodeData) {
   let valid = true;
@@ -23,53 +24,53 @@ export async function getServerSideProps(context) {
   let locationValid = true;
   let success = true;
 
-  let location = "";
-  let latitude = "";
-  let longitude = "";
-  let sunrise = "";
-  let sunset = "";
-  let temp = "";
-  let feelsLike = "";
-  let pressure = "";
-  let humidity = "";
-  let weatherID = "";
-  let weatherMain = "";
-  let weatherDescription = "";
-  let weatherIcon = "";
+  let location = '';
+  let latitude = '';
+  let longitude = '';
+  let sunrise = '';
+  let sunset = '';
+  let temp = '';
+  let feelsLike = '';
+  let pressure = '';
+  let humidity = '';
+  let weatherID = '';
+  let weatherMain = '';
+  let weatherDescription = '';
+  let weatherIcon = '';
 
   if (context.query.location) {
-    console.log("Getting geocode data...");
+    console.log('Getting geocode data...');
     await axios
       .get(
         `http://api.positionstack.com/v1/forward?access_key=${process.env.POSITION_STACK_API_KEY}&query=${context.query.location}&limit=1`
       )
       .then(
         (response) => {
-          console.log("✅ Geocode data received.");
+          console.log('✅ Geocode data received.');
 
           const geocodeData = response;
 
-          console.log("Validating geocode data...");
+          console.log('Validating geocode data...');
 
           if (validateGeocodeData(geocodeData)) {
-            console.log("✅ Geocode data is valid.");
+            console.log('✅ Geocode data is valid.');
             logGeocodeData(geocodeData);
 
             location = geocodeData.data.data[0].label;
-            console.log("Getting weather data...");
+            console.log('Getting weather data...');
 
             return axios.get(
               `https://api.openweathermap.org/data/3.0/onecall?lat=${geocodeData.data.data[0].latitude}&lon=${geocodeData.data.data[0].longitude}&exclude=hourly,daily&appid=${process.env.OPEN_WEATHER_API_KEY}`
             );
           } else {
-            console.log("❌ Geocode data is invalid.");
+            console.log('❌ Geocode data is invalid.');
             success = false;
             locationValid = false;
           }
         },
         (error) => {
           console.log(
-            "❌ Geocode error:",
+            '❌ Geocode error:',
             error.response.data.error.context.query.message
           );
           success = false;
@@ -80,7 +81,7 @@ export async function getServerSideProps(context) {
       .then(
         (response) => {
           if (response) {
-            console.log("✅ Weather data received.");
+            console.log('✅ Weather data received.');
             logWeatherData(response.data);
             latitude = response.data.lat;
             longitude = response.data.lon;
@@ -97,30 +98,30 @@ export async function getServerSideProps(context) {
           }
         },
         (error) => {
-          console.log("❌ Open weather error.");
+          console.log('❌ Open weather error.');
           success = false;
         }
       );
   }
 
   function logGeocodeData(geocodeData) {
-    console.log("----- Geocode Data -----");
-    console.log("Status:", geocodeData.status);
-    console.log("Status Text:", geocodeData.statusText);
-    console.log("Data:", geocodeData.data);
+    console.log('----- Geocode Data -----');
+    console.log('Status:', geocodeData.status);
+    console.log('Status Text:', geocodeData.statusText);
+    console.log('Data:', geocodeData.data);
   }
 
   function logWeatherData(weatherData) {
-    console.log("----- Weather Data -----");
-    console.log("Lat:", weatherData.lat);
-    console.log("Lon:", weatherData.lon);
-    console.log("Sunrise:", weatherData.current.sunrise);
-    console.log("Sunset:", weatherData.current.sunset);
-    console.log("Temp:", weatherData.current.temp);
-    console.log("Feels like:", weatherData.current.feels_like);
-    console.log("Pressure:", weatherData.current.pressure);
-    console.log("Pressure:", weatherData.current.humidity);
-    console.log("Weather:", weatherData.current.weather);
+    console.log('----- Weather Data -----');
+    console.log('Lat:', weatherData.lat);
+    console.log('Lon:', weatherData.lon);
+    console.log('Sunrise:', weatherData.current.sunrise);
+    console.log('Sunset:', weatherData.current.sunset);
+    console.log('Temp:', weatherData.current.temp);
+    console.log('Feels like:', weatherData.current.feels_like);
+    console.log('Pressure:', weatherData.current.pressure);
+    console.log('Pressure:', weatherData.current.humidity);
+    console.log('Weather:', weatherData.current.weather);
   }
 
   const data = {
@@ -148,7 +149,7 @@ export async function getServerSideProps(context) {
 
 export default function Home({ data }) {
   const router = useRouter();
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState('');
 
   const handleClick = (e) => {
     e.preventDefault();
@@ -161,7 +162,7 @@ export default function Home({ data }) {
 
   const longitude = data.longitude;
   const latitude = data.latitude;
-  const locationInvalidMessage = "Location not found. Please try again.";
+  const locationInvalidMessage = 'Location not found. Please try again.';
 
   console.log(data);
 
@@ -178,9 +179,10 @@ export default function Home({ data }) {
 
       <main>
         <h1>Welcome to Helios Weather!</h1>
+        <Sidebar></Sidebar>
         <button onClick={handleClick}>Update route</button>
         <input type="text" onChange={handleLocationChange}></input>
-        <p>
+        {/* <p>
           Location Valid: {data.locationValid ? "True" : locationInvalidMessage}
         </p>
         <p>Location: {data.location}</p>
@@ -195,7 +197,7 @@ export default function Home({ data }) {
         <p>Weather ID: {data.weatherID}</p>
         <p>Weather Main: {data.weatherMain}</p>
         <p>Weather Description: {data.weatherDescription}</p>
-        <p>Weather Icon: {data.weatherIcon}</p>
+        <p>Weather Icon: {data.weatherIcon}</p> */}
       </main>
 
       <footer>
@@ -204,7 +206,7 @@ export default function Home({ data }) {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Powered by{" "}
+          Powered by{' '}
           <span>
             <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
           </span>
