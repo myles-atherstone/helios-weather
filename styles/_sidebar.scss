@@ -1,5 +1,17 @@
 @use './vars';
 
 .sidebar {
-  background: vars.$primary;
+  background: #9cecfb; /* fallback for old browsers */
+  background: -webkit-linear-gradient(
+    150deg,
+    rgba(0, 82, 212, 1) 0%,
+    rgba(101, 199, 247, 1) 48%,
+    rgba(156, 236, 251, 1) 100%
+  ); /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(
+    150deg,
+    rgba(0, 82, 212, 1) 0%,
+    rgba(101, 199, 247, 1) 48%,
+    rgba(156, 236, 251, 1) 100%
+  ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 }

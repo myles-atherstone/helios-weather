@@ -178,10 +178,14 @@ export default function Home({ data }) {
       </Head>
 
       <main>
-        <h1>Welcome to Helios Weather!</h1>
+        <div>
+          <h1>Welcome to Helios Weather!</h1>
+          <button onClick={handleClick}>Update route</button>
+          <input type="text" onChange={handleLocationChange}></input>
+        </div>
+
         <Sidebar></Sidebar>
-        <button onClick={handleClick}>Update route</button>
-        <input type="text" onChange={handleLocationChange}></input>
+
         {/* <p>
           Location Valid: {data.locationValid ? "True" : locationInvalidMessage}
         </p>
