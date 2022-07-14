@@ -1,17 +1,40 @@
 @use './vars';
 
 .sidebar {
-  background: #9cecfb; /* fallback for old browsers */
-  background: -webkit-linear-gradient(
-    150deg,
-    rgba(0, 82, 212, 1) 0%,
-    rgba(101, 199, 247, 1) 48%,
-    rgba(156, 236, 251, 1) 100%
-  ); /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(
-    150deg,
-    rgba(0, 82, 212, 1) 0%,
-    rgba(101, 199, 247, 1) 48%,
-    rgba(156, 236, 251, 1) 100%
-  ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: rgb(26, 49, 100); /* fallback for old browsers */
+  padding: 3rem;
+  position: relative;
+
+  .content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .radial-gradient-top {
+    background: rgb(137, 183, 255);
+    background: radial-gradient(
+      circle at top left,
+      rgba(183, 205, 252, 0.527) 0%,
+      rgba(255, 255, 255, 0) 60%
+    );
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+  }
+
+  .radial-gradient-bottom {
+    background: rgb(137, 183, 255);
+    background: radial-gradient(
+      circle at bottom right,
+      rgb(54, 88, 161) 0%,
+      rgba(255, 255, 255, 0) 60%
+    );
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+  }
 }

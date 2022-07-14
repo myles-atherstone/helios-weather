@@ -26,10 +26,10 @@ a {
 }
 
 main {
-  height: calc(100vh - vars.$footer-height);
-  overflow: auto;
   display: grid;
   grid-template-columns: 65% 35%;
+  height: calc(100vh - vars.$footer-height);
+  overflow: auto;
 }
 
 footer {
