@@ -245,19 +245,7 @@ export default function Home({ data }) {
         {/* <p>
           Location Valid: {data.locationValid ? "True" : locationInvalidMessage}
         </p>
-        <p>Location: {data.location}</p>
-        <p>Lat: {latitude}</p>
-        <p>Long: {longitude}</p>
-        <p>Sunrise: {data.sunrise}</p>
-        <p>Sunset: {data.sunset}</p>
-        <p>Temperature: {data.temp}</p>
-        <p>Feels Like: {data.feelsLike}</p>
-        <p>Pressue: {data.pressure}</p>
-        <p>Humidity: {data.humidity}</p>
-        <p>Weather ID: {data.weatherID}</p>
-        <p>Weather Main: {data.weatherMain}</p>
-        <p>Weather Description: {data.weatherDescription}</p>
-        <p>Weather Icon: {data.weatherIcon}</p> */}
+        */}
       </main>
 
       <footer>
