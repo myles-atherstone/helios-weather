@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 import Sidebar from '../components/containers/sidebar/sidebar';
 import Location from '../components/widgets/location/location';
+import formatDate from '../util/dateHelper';
 
 const axios = require('axios').default;
 
@@ -28,6 +29,8 @@ export async function getServerSideProps(context) {
   let location = '';
   let latitude = '';
   let longitude = '';
+  let timezoneOffset = '';
+  let timestamp = '';
   let sunrise = '';
   let sunset = '';
   let temp = '';
@@ -86,6 +89,8 @@ export async function getServerSideProps(context) {
             logWeatherData(response.data);
             latitude = response.data.lat;
             longitude = response.data.lon;
+            timezoneOffset = response.data.timezone_offset;
+            timestamp = response.data.current.dt;
             sunrise = response.data.current.sunrise;
             sunset = response.data.current.sunset;
             temp = response.data.current.temp;
@@ -116,6 +121,8 @@ export async function getServerSideProps(context) {
     console.log('----- Weather Data -----');
     console.log('Lat:', weatherData.lat);
     console.log('Lon:', weatherData.lon);
+    console.log('Timezone Offset:', weatherData.timezone_offset);
+    console.log('Timestamp:', weatherData.current.dt);
     console.log('Sunrise:', weatherData.current.sunrise);
     console.log('Sunset:', weatherData.current.sunset);
     console.log('Temp:', weatherData.current.temp);
@@ -130,6 +137,8 @@ export async function getServerSideProps(context) {
     locationValid: locationValid,
     location: location,
     latitude: latitude,
+    timezoneOffset: timezoneOffset,
+    timestamp: timestamp,
     longitude: longitude,
     sunrise: sunrise,
     sunset: sunset,
@@ -152,6 +161,9 @@ export default function Home({ data }) {
   const router = useRouter();
   const [location, setLocation] = useState('');
 
+  const date = new Date((data.timestamp + data.timezoneOffset) * 1000);
+  const dateValues = formatDate(date);
+
   const handleClick = (e) => {
     e.preventDefault();
     router.push(`?location=${location}`);
@@ -161,8 +173,6 @@ export default function Home({ data }) {
     setLocation(e.target.value);
   };
 
-  const longitude = data.longitude;
-  const latitude = data.latitude;
   const locationInvalidMessage = 'Location not found. Please try again.';
 
   console.log(data);
@@ -186,7 +196,12 @@ export default function Home({ data }) {
         </div>
 
         <Sidebar>
-          <Location location={data.location} />{' '}
+          <Location
+            location={data.location}
+            hours={dateValues[3]}
+            minutes={dateValues[4]}
+            period={dateValues[7]}
+          />
         </Sidebar>
 
         {/* <p>
