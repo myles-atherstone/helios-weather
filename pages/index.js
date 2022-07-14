@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 import Sidebar from '../components/containers/sidebar/sidebar';
 import Location from '../components/widgets/location/location';
+import PrimaryWeather from '../components/widgets/primary-weather/primary-weather';
 import formatDate from '../util/dateHelper';
 
 const axios = require('axios').default;
@@ -201,6 +202,12 @@ export default function Home({ data }) {
             hours={dateValues[3]}
             minutes={dateValues[4]}
             period={dateValues[7]}
+          />
+          <PrimaryWeather
+            temperature={data.temp}
+            weatherMain={data.weatherMain}
+            weatherDescription={data.weatherDescription}
+            icon={data.weatherIcon}
           />
         </Sidebar>
 
