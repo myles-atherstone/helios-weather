@@ -16,7 +16,7 @@ function validateGeocodeData(geocodeData) {
     valid = valid && false;
   }
 
-  if (geocodeData && geocodeData.data.data.length === 0) {
+  if (geocodeData && geocodeData.length === 0) {
     valid = valid && false;
   }
 
@@ -26,25 +26,78 @@ function validateGeocodeData(geocodeData) {
 export async function getServerSideProps(context) {
   let locationValid = true;
   let success = true;
+  let location;
+  let currentWeather;
 
-  let location = '';
-  let latitude = '';
-  let longitude = '';
-  let timezoneOffset = '';
-  let timestamp = '';
-  let sunrise = '';
-  let sunset = '';
-  let temp = '';
-  let feelsLike = '';
-  let pressure = '';
-  let humidity = '';
-  let weatherID = '';
-  let weatherMain = '';
-  let weatherDescription = '';
-  let weatherIcon = '';
+  class Location {
+    lat;
+    lon;
+    locationName;
+    region;
+    country;
+
+    constructor(locationData) {
+      this.lat = locationData.latitude;
+      this.lon = locationData.longitude;
+      this.locationName = locationData.name;
+      this.region = locationData.region;
+      this.country = locationData.country;
+    }
+  }
+
+  class CurrentWeather {
+    unixTime;
+    timezoneOffset;
+    coord = {
+      lat: null,
+      lon: null,
+    };
+    weather = {
+      main: null,
+      description: null,
+      icon: null,
+    };
+    main = {
+      temp: null,
+      feelsLike: null,
+      pressure: null,
+      humidity: null,
+    };
+    visibility;
+    wind = {
+      speed: null,
+      degree: null,
+    };
+    cloudiness;
+    sun = {
+      sunrise: null,
+      sunset: null,
+    };
+
+    constructor(weatherData) {
+      this.coord.lat = weatherData.coord.lat;
+      this.coord.lon = weatherData.coord.lon;
+      this.unixTime = weatherData.dt;
+      this.timezoneOffset = weatherData.timezone;
+      this.weather.main = weatherData.weather[0].main;
+      this.weather.description = weatherData.weather[0].description;
+      this.weather.icon = weatherData.weather[0].icon;
+      this.main.temp = weatherData.main.temp;
+      this.main.feelsLike = weatherData.main.feels_like;
+      this.main.pressure = weatherData.main.pressure;
+      this.main.humidity = weatherData.main.humidty;
+      this.visibility = weatherData.visibility;
+      this.wind.speed = weatherData.wind.speed;
+      this.wind.degree = weatherData.wind.degree;
+      this.cloudiness = weatherData.clouds.all;
+      this.sun.sunrise = weatherData.sys.sunrise;
+      this.sun.sunset = weatherData.sys.sunset;
+    }
+  }
 
   if (context.query.location) {
     console.log('Getting geocode data...');
+
     await axios
       .get(
         `http://api.positionstack.com/v1/forward?access_key=${process.env.POSITION_STACK_API_KEY}&query=${context.query.location}&limit=1`
@@ -53,19 +106,20 @@ export async function getServerSideProps(context) {
         (response) => {
           console.log('✅ Geocode data received.');
 
-          const geocodeData = response;
+          const geocodeData = response.data.data;
+          logGeocodeData(geocodeData);
 
           console.log('Validating geocode data...');
 
           if (validateGeocodeData(geocodeData)) {
             console.log('✅ Geocode data is valid.');
-            logGeocodeData(geocodeData);
 
-            location = geocodeData.data.data[0].label;
+            location = new Location(geocodeData[0]);
+
             console.log('Getting weather data...');
 
             return axios.get(
-              `https://api.openweathermap.org/data/3.0/onecall?lat=${geocodeData.data.data[0].latitude}&lon=${geocodeData.data.data[0].longitude}&exclude=hourly,daily&appid=${process.env.OPEN_WEATHER_API_KEY}`
+              `https://api.openweathermap.org/data/2.5/weather?lat=${geocodeData[0].latitude}&lon=${geocodeData[0].longitude}&appid=${process.env.OPEN_WEATHER_API_KEY}`
             );
           } else {
             console.log('❌ Geocode data is invalid.');
@@ -87,25 +141,17 @@ export async function getServerSideProps(context) {
         (response) => {
           if (response) {
             console.log('✅ Weather data received.');
-            logWeatherData(response.data);
-            latitude = response.data.lat;
-            longitude = response.data.lon;
-            timezoneOffset = response.data.timezone_offset;
-            timestamp = response.data.current.dt;
-            sunrise = response.data.current.sunrise;
-            sunset = response.data.current.sunset;
-            temp = response.data.current.temp;
-            feelsLike = response.data.current.feels_like;
-            pressure = response.data.current.pressure;
-            humidity = response.data.current.humidity;
-            weatherID = response.data.current.weather[0].id;
-            weatherMain = response.data.current.weather[0].main;
-            weatherDescription = response.data.current.weather[0].description;
-            weatherIcon = response.data.current.weather[0].icon;
+
+            const weatherData = response.data;
+
+            logWeatherData(weatherData);
+
+            currentWeather = new CurrentWeather(weatherData);
           }
         },
         (error) => {
           console.log('❌ Open weather error.');
+          console.log(error);
           success = false;
         }
       );
@@ -113,44 +159,19 @@ export async function getServerSideProps(context) {
 
   function logGeocodeData(geocodeData) {
     console.log('----- Geocode Data -----');
-    console.log('Status:', geocodeData.status);
-    console.log('Status Text:', geocodeData.statusText);
-    console.log('Data:', geocodeData.data);
+    console.log(geocodeData);
   }
 
   function logWeatherData(weatherData) {
     console.log('----- Weather Data -----');
-    console.log('Lat:', weatherData.lat);
-    console.log('Lon:', weatherData.lon);
-    console.log('Timezone Offset:', weatherData.timezone_offset);
-    console.log('Timestamp:', weatherData.current.dt);
-    console.log('Sunrise:', weatherData.current.sunrise);
-    console.log('Sunset:', weatherData.current.sunset);
-    console.log('Temp:', weatherData.current.temp);
-    console.log('Feels like:', weatherData.current.feels_like);
-    console.log('Pressure:', weatherData.current.pressure);
-    console.log('Pressure:', weatherData.current.humidity);
-    console.log('Weather:', weatherData.current.weather);
+    console.log(weatherData);
   }
 
   const data = {
     success: success,
     locationValid: locationValid,
-    location: location,
-    latitude: latitude,
-    timezoneOffset: timezoneOffset,
-    timestamp: timestamp,
-    longitude: longitude,
-    sunrise: sunrise,
-    sunset: sunset,
-    temp: temp,
-    feelsLike: feelsLike,
-    pressure: pressure,
-    humidity: humidity,
-    weatherID: weatherID,
-    weatherMain: weatherMain,
-    weatherDescription: weatherDescription,
-    weatherIcon: weatherIcon,
+    location: JSON.stringify(location),
+    currentWeather: JSON.stringify(currentWeather),
   };
 
   return {
@@ -159,24 +180,32 @@ export async function getServerSideProps(context) {
 }
 
 export default function Home({ data }) {
-  const router = useRouter();
-  const [location, setLocation] = useState('');
+  const success = data.success;
+  const locationValid = data.locationValid;
+  const location = JSON.parse(data.location);
+  const currentWeather = JSON.parse(data.currentWeather);
 
-  const date = new Date((data.timestamp + data.timezoneOffset) * 1000);
-  const dateValues = formatDate(date);
+  const router = useRouter();
+  const [locationInput, setLocationInput] = useState('');
+
+  const currentDate = new Date(
+    (currentWeather.unixTime + currentWeather.timezoneOffset) * 1000
+  );
+  const dateValues = formatDate(currentDate);
 
   const handleClick = (e) => {
     e.preventDefault();
-    router.push(`?location=${location}`);
+    router.push(`?location=${locationInput}`);
   };
 
   const handleLocationChange = (e) => {
-    setLocation(e.target.value);
+    setLocationInput(e.target.value);
   };
 
   const locationInvalidMessage = 'Location not found. Please try again.';
 
-  console.log(data);
+  console.log('Current Weather', currentWeather);
+  console.log('Location', location);
 
   return (
     <div>
@@ -198,16 +227,18 @@ export default function Home({ data }) {
 
         <Sidebar>
           <Location
-            location={data.location}
+            name={location.locationName}
+            region={location.region}
+            country={location.country}
             hours={dateValues[3]}
             minutes={dateValues[4]}
             period={dateValues[7]}
           />
           <PrimaryWeather
-            temperature={data.temp}
-            weatherMain={data.weatherMain}
-            weatherDescription={data.weatherDescription}
-            icon={data.weatherIcon}
+            temperature={currentWeather.main.temp}
+            weatherMain={currentWeather.weather.main}
+            weatherDescription={currentWeather.weather.description}
+            icon={currentWeather.weather.icon}
           />
         </Sidebar>
 
