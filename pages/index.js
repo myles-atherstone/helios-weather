@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import Sidebar from '../components/containers/sidebar/sidebar';
+import Location from '../components/widgets/location/location';
 
 const axios = require('axios').default;
 
@@ -184,7 +185,9 @@ export default function Home({ data }) {
           <input type="text" onChange={handleLocationChange}></input>
         </div>
 
-        <Sidebar></Sidebar>
+        <Sidebar>
+          <Location location={data.location} />{' '}
+        </Sidebar>
 
         {/* <p>
           Location Valid: {data.locationValid ? "True" : locationInvalidMessage}
