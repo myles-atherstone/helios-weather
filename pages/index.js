@@ -8,6 +8,7 @@ import Location from '../components/widgets/location/location';
 import PrimaryWeather from '../components/widgets/primary-weather/primary-weather';
 import Rain from '../components/widgets/rain/rain';
 import Sun from '../components/widgets/sun/sun';
+import TemperatureChart from '../components/widgets/temperature-chart/temperature-chart';
 import formatDate from '../util/dateHelper';
 
 const axios = require('axios').default;
@@ -241,6 +242,7 @@ export async function getServerSideProps(context) {
 export default function Home({ data }) {
   const success = data.success;
   const locationValid = data.locationValid;
+  const [temperatureScale, setTemperatureScale] = useState('C');
   const location = JSON.parse(data.location);
   const currentWeather = JSON.parse(data.currentWeather);
   const forecasts = JSON.parse(data.forecasts);
@@ -306,6 +308,13 @@ export default function Home({ data }) {
               </div>
             </div>
           </div>
+          <div className="temperature-chart-widget">
+            <span className="title">Weekly Temperature</span>
+            <TemperatureChart
+              forecasts={forecasts}
+              temperatureScale={temperatureScale}
+            />
+          </div>
         </div>
 
         <Sidebar>
@@ -323,6 +332,8 @@ export default function Home({ data }) {
               weatherMain={currentWeather.weather.main}
               weatherDescription={currentWeather.weather.description}
               icon={currentWeather.weather.icon}
+              temperatureScale={temperatureScale}
+              setTemperatureScale={setTemperatureScale}
             />
           </div>
           <div className="sidebar-bottom">
