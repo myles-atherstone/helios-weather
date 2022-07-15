@@ -16,16 +16,16 @@
   position: relative;
 
   .search-button {
+    height: 50px;
+    left: 0;
     position: absolute;
     top: 0;
-    left: 0;
-    height: 50px;
     width: 50px;
   }
 
   .search-button {
-    border: none;
     background: #f8f8f8 url('../public/images/search.png') no-repeat center;
+    border: none;
 
     &:hover {
       background: #f8f8f8 url('../public/images/search-active.png') no-repeat
@@ -35,14 +35,14 @@
   }
 
   .search-box {
-    width: 100%;
+    background: #f8f8f8;
+    border: none;
+    color: black;
+    font-family: 'poppins';
+    font-size: 1.6rem;
     height: 50px;
     padding-left: 57px;
-    border: none;
-    background: #f8f8f8;
-    color: black;
-    font-size: 1.6rem;
-    font-family: 'poppins';
+    width: 100%;
 
     &:hover {
       outline: 1px solid vars.$grey;
@@ -257,8 +257,8 @@
     border-radius: 4.5rem;
     height: 4.5rem;
     text-align: center;
-    width: 74%;
     transition: border 0.1s ease;
+    width: 74%;
 
     &:hover {
       border: 1px solid vars.$primary;
