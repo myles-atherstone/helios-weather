@@ -5,6 +5,7 @@ import { useState } from 'react';
 import Sidebar from '../components/containers/sidebar/sidebar';
 import Location from '../components/widgets/location/location';
 import PrimaryWeather from '../components/widgets/primary-weather/primary-weather';
+import Sun from '../components/widgets/sun/sun';
 import formatDate from '../util/dateHelper';
 
 const axios = require('axios').default;
@@ -37,11 +38,22 @@ export async function getServerSideProps(context) {
     country;
 
     constructor(locationData) {
-      this.lat = locationData.latitude;
-      this.lon = locationData.longitude;
-      this.locationName = locationData.name;
-      this.region = locationData.region;
-      this.country = locationData.country;
+      this.lat =
+        typeof locationData.latitude !== 'undefined'
+          ? locationData.latitude
+          : null;
+      this.lon =
+        typeof locationData.longitude !== 'undefined'
+          ? locationData.longitude
+          : null;
+      this.locationName =
+        typeof locationData.name !== 'undefined' ? locationData.name : null;
+      this.region =
+        typeof locationData.region !== 'undefined' ? locationData.region : null;
+      this.country =
+        typeof locationData.country !== 'undefined'
+          ? locationData.country
+          : null;
     }
   }
 
@@ -239,6 +251,12 @@ export default function Home({ data }) {
             weatherMain={currentWeather.weather.main}
             weatherDescription={currentWeather.weather.description}
             icon={currentWeather.weather.icon}
+          />
+          <Sun
+            sunriseTime={currentWeather.sun.sunrise}
+            sunsetTime={currentWeather.sun.sunset}
+            currentDate={currentDate}
+            timezoneOffset={currentWeather.timezoneOffset}
           />
         </Sidebar>
 
