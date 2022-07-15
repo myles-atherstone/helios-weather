@@ -279,10 +279,25 @@ export default function Home({ data }) {
       </Head>
 
       <main>
-        <div>
-          <h1>Welcome to Helios Weather!</h1>
-          <button onClick={handleClick}>Update route</button>
-          <input type="text" onChange={handleLocationChange}></input>
+        <div className="primary-view">
+          <div className="date-search-widget">
+            <div className="date-widget">
+              <h1>Welcome to Helios Weather!</h1>
+            </div>
+            <div className="search-widget">
+              <button
+                className="search-button"
+                onClick={handleClick}
+                aria-label="Search location"
+              ></button>
+              <input
+                className="search-box"
+                type="text"
+                onChange={handleLocationChange}
+                placeholder="Search location here"
+              ></input>
+            </div>
+          </div>
         </div>
 
         <Sidebar>
