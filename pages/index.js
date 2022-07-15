@@ -176,7 +176,7 @@ export async function getServerSideProps(context) {
     )
     .then(
       (response) => {
-        if (response) {
+        if (response && success) {
           console.log('✅ Weather data received.');
 
           const weatherData = response.data;
@@ -200,18 +200,20 @@ export async function getServerSideProps(context) {
     )
     .then(
       (response) => {
-        console.log('✅ Forecast data received.');
+        if (response && success) {
+          console.log('✅ Forecast data received.');
 
-        const forecastData = response.data;
+          const forecastData = response.data;
 
-        // console.log('----- Forecast Data -----');
-        // console.log(response.data);
+          // console.log('----- Forecast Data -----');
+          // console.log(response.data);
 
-        const timezoneOffset = forecastData.city.timezone;
+          const timezoneOffset = forecastData.city.timezone;
 
-        forecastData.list.forEach((forecast) => {
-          forecasts.push(new Forecast(forecast, timezoneOffset));
-        });
+          forecastData.list.forEach((forecast) => {
+            forecasts.push(new Forecast(forecast, timezoneOffset));
+          });
+        }
       },
       (error) => {
         console.log('❌ Open Weather - forecast API error.');
@@ -234,8 +236,12 @@ export async function getServerSideProps(context) {
     success: success,
     locationValid: locationValid,
     location: JSON.stringify(location),
-    currentWeather: JSON.stringify(currentWeather),
-    forecasts: JSON.stringify(forecasts),
+    currentWeather:
+      typeof currentWeather !== 'undefined'
+        ? JSON.stringify(currentWeather)
+        : null,
+    forecasts:
+      typeof forecasts !== 'undefined' ? JSON.stringify(forecasts) : null,
   };
 
   return {
@@ -255,10 +261,15 @@ export default function Home({ data }) {
   const router = useRouter();
   const [locationInput, setLocationInput] = useState('');
 
-  const currentDate = new Date(
-    (currentWeather.unixTime + currentWeather.timezoneOffset) * 1000
-  );
-  const dateValues = formatDate(currentDate);
+  let currentDate;
+  let dateValues;
+
+  if (currentWeather !== null) {
+    currentDate = new Date(
+      (currentWeather.unixTime + currentWeather.timezoneOffset) * 1000
+    );
+    dateValues = formatDate(currentDate);
+  }
 
   const handleClick = (e) => {
     e.preventDefault();
@@ -290,11 +301,13 @@ export default function Home({ data }) {
           <div className="date-search-widget">
             <div className="date-widget">
               <h1 className="app-name">Helios Weather</h1>
-              <DateDisplay
-                day={dateValues[2]}
-                month={dateValues[1]}
-                year={dateValues[0]}
-              />
+              {currentWeather && forecasts && (
+                <DateDisplay
+                  day={dateValues[2]}
+                  month={dateValues[1]}
+                  year={dateValues[0]}
+                />
+              )}
             </div>
             <div className="search-widget">
               <div className="wrapper">
@@ -312,75 +325,81 @@ export default function Home({ data }) {
               </div>
             </div>
           </div>
-          <div className="data-box-container">
-            <DataBox
-              title="Humidity"
-              data={currentWeather.main.humidity}
-              unit="%"
-              icon="/images/humidity.png"
-            />
-            <DataBox
-              title="Cloudiness"
-              data={currentWeather.cloudiness}
-              unit="%"
-              icon="/images/clouds.png"
-            />
-            <DataBox
-              title="Pressure"
-              data={currentWeather.main.pressure}
-              unit=" hPa"
-              icon="/images/pressure.png"
-            />
-            <DataBox
-              title="Wind"
-              data={currentWeather.wind.speed}
-              unit="m/s"
-              icon="/images/wind.png"
-            />
-          </div>
-          <div className="temperature-chart-widget">
-            <span className="title">Weekly Temperature</span>
-            <TemperatureChart
-              forecasts={forecasts}
-              temperatureScale={temperatureScale}
-            />
-          </div>
+          {currentWeather && forecasts && (
+            <>
+              <div className="data-box-container">
+                <DataBox
+                  title="Humidity"
+                  data={currentWeather.main.humidity}
+                  unit="%"
+                  icon="/images/humidity.png"
+                />
+                <DataBox
+                  title="Cloudiness"
+                  data={currentWeather.cloudiness}
+                  unit="%"
+                  icon="/images/clouds.png"
+                />
+                <DataBox
+                  title="Pressure"
+                  data={currentWeather.main.pressure}
+                  unit=" hPa"
+                  icon="/images/pressure.png"
+                />
+                <DataBox
+                  title="Wind"
+                  data={currentWeather.wind.speed}
+                  unit="m/s"
+                  icon="/images/wind.png"
+                />
+              </div>
+              <div className="temperature-chart-widget">
+                <span className="title">Weekly Temperature</span>
+                <TemperatureChart
+                  forecasts={forecasts}
+                  temperatureScale={temperatureScale}
+                />
+              </div>
+            </>
+          )}
+          {(!currentWeather || !forecasts) && (
+            <p className="error">{locationInvalidMessage}</p>
+          )}
         </div>
 
         <Sidebar>
-          <div className="sidebar-top">
-            <Location
-              name={location.locationName}
-              region={location.region}
-              country={location.country}
-              hours={dateValues[3]}
-              minutes={dateValues[4]}
-              period={dateValues[7]}
-            />
-            <PrimaryWeather
-              temperature={currentWeather.main.temp}
-              weatherMain={currentWeather.weather.main}
-              weatherDescription={currentWeather.weather.description}
-              icon={currentWeather.weather.icon}
-              temperatureScale={temperatureScale}
-              setTemperatureScale={setTemperatureScale}
-            />
-          </div>
-          <div className="sidebar-bottom">
-            <Rain forecasts={forecasts} displayNumber={4} />
-            <Sun
-              sunriseTime={currentWeather.sun.sunrise}
-              sunsetTime={currentWeather.sun.sunset}
-              currentDate={currentDate}
-              timezoneOffset={currentWeather.timezoneOffset}
-            />
-          </div>
+          {currentWeather && forecasts && (
+            <>
+              <div className="sidebar-top">
+                <Location
+                  name={location.locationName}
+                  region={location.region}
+                  country={location.country}
+                  hours={dateValues[3]}
+                  minutes={dateValues[4]}
+                  period={dateValues[7]}
+                />
+                <PrimaryWeather
+                  temperature={currentWeather.main.temp}
+                  weatherMain={currentWeather.weather.main}
+                  weatherDescription={currentWeather.weather.description}
+                  icon={currentWeather.weather.icon}
+                  temperatureScale={temperatureScale}
+                  setTemperatureScale={setTemperatureScale}
+                />
+              </div>
+              <div className="sidebar-bottom">
+                <Rain forecasts={forecasts} displayNumber={4} />
+                <Sun
+                  sunriseTime={currentWeather.sun.sunrise}
+                  sunsetTime={currentWeather.sun.sunset}
+                  currentDate={currentDate}
+                  timezoneOffset={currentWeather.timezoneOffset}
+                />
+              </div>
+            </>
+          )}
         </Sidebar>
-
-        {/* <p>
-          Location Valid: {data.locationValid ? "True" : locationInvalidMessage}
-        </p>
-        */}
       </main>
 
       {/* <footer>
