@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import Sidebar from '../components/containers/sidebar/sidebar';
+import DataBox from '../components/widgets/data-box/data-box';
 import DateDisplay from '../components/widgets/date-display/date-display';
 import Location from '../components/widgets/location/location';
 import PrimaryWeather from '../components/widgets/primary-weather/primary-weather';
@@ -31,6 +32,7 @@ export async function getServerSideProps(context) {
   let locationValid = true;
   let success = true;
   let location;
+  const defaultLocation = 'Rhodes';
   let currentWeather;
   let forecasts = [];
 
@@ -101,7 +103,7 @@ export async function getServerSideProps(context) {
       this.main.temp = weatherData.main.temp;
       this.main.feelsLike = weatherData.main.feels_like;
       this.main.pressure = weatherData.main.pressure;
-      this.main.humidity = weatherData.main.humidty;
+      this.main.humidity = weatherData.main.humidity;
       this.visibility = weatherData.visibility;
       this.wind.speed = weatherData.wind.speed;
       this.wind.degree = weatherData.wind.degree;
@@ -127,94 +129,96 @@ export async function getServerSideProps(context) {
     }
   }
 
-  if (context.query.location) {
-    console.log('Getting geocode data...');
+  context.query.location
+    ? (location = context.query.location)
+    : (location = defaultLocation);
 
-    await axios
-      .get(
-        `http://api.positionstack.com/v1/forward?access_key=${process.env.POSITION_STACK_API_KEY}&query=${context.query.location}&limit=1`
-      )
-      .then(
-        (response) => {
-          console.log('✅ Geocode data received.');
+  console.log('Getting geocode data...');
 
-          const geocodeData = response.data.data;
-          // logGeocodeData(geocodeData);
+  await axios
+    .get(
+      `http://api.positionstack.com/v1/forward?access_key=${process.env.POSITION_STACK_API_KEY}&query=${location}&limit=1`
+    )
+    .then(
+      (response) => {
+        console.log('✅ Geocode data received.');
 
-          console.log('Validating geocode data...');
+        const geocodeData = response.data.data;
+        // logGeocodeData(geocodeData);
 
-          if (validateGeocodeData(geocodeData)) {
-            console.log('✅ Geocode data is valid.');
+        console.log('Validating geocode data...');
 
-            location = new Location(geocodeData[0]);
+        if (validateGeocodeData(geocodeData)) {
+          console.log('✅ Geocode data is valid.');
 
-            console.log('Getting weather data...');
+          location = new Location(geocodeData[0]);
 
-            return axios.get(
-              `https://api.openweathermap.org/data/2.5/weather?lat=${location.lat}&lon=${location.lon}&appid=${process.env.OPEN_WEATHER_API_KEY}`
-            );
-          } else {
-            console.log('❌ Geocode data is invalid.');
-            success = false;
-            locationValid = false;
-          }
-        },
-        (error) => {
-          console.log(
-            '❌ Geocode error:',
-            error.response.data.error.context.query.message
+          console.log('Getting weather data...');
+
+          return axios.get(
+            `https://api.openweathermap.org/data/2.5/weather?lat=${location.lat}&lon=${location.lon}&appid=${process.env.OPEN_WEATHER_API_KEY}`
           );
+        } else {
+          console.log('❌ Geocode data is invalid.');
           success = false;
           locationValid = false;
-          return false;
         }
-      )
-      .then(
-        (response) => {
-          if (response) {
-            console.log('✅ Weather data received.');
+      },
+      (error) => {
+        console.log(
+          '❌ Geocode error:',
+          error.response.data.error.context.query.message
+        );
+        success = false;
+        locationValid = false;
+        return false;
+      }
+    )
+    .then(
+      (response) => {
+        if (response) {
+          console.log('✅ Weather data received.');
 
-            const weatherData = response.data;
+          const weatherData = response.data;
 
-            // logWeatherData(weatherData);
+          // logWeatherData(weatherData);
 
-            currentWeather = new CurrentWeather(weatherData);
+          currentWeather = new CurrentWeather(weatherData);
 
-            console.log('Getting forecast data...');
+          console.log('Getting forecast data...');
 
-            return axios.get(
-              `https://api.openweathermap.org/data/2.5/forecast?lat=${location.lat}&lon=${location.lon}&appid=${process.env.OPEN_WEATHER_API_KEY}`
-            );
-          }
-        },
-        (error) => {
-          console.log('❌ Open Weather - weather API error.');
-          console.log(error);
-          success = false;
+          return axios.get(
+            `https://api.openweathermap.org/data/2.5/forecast?lat=${location.lat}&lon=${location.lon}&appid=${process.env.OPEN_WEATHER_API_KEY}`
+          );
         }
-      )
-      .then(
-        (response) => {
-          console.log('✅ Forecast data received.');
+      },
+      (error) => {
+        console.log('❌ Open Weather - weather API error.');
+        console.log(error);
+        success = false;
+      }
+    )
+    .then(
+      (response) => {
+        console.log('✅ Forecast data received.');
 
-          const forecastData = response.data;
+        const forecastData = response.data;
 
-          // console.log('----- Forecast Data -----');
-          // console.log(response.data);
+        // console.log('----- Forecast Data -----');
+        // console.log(response.data);
 
-          const timezoneOffset = forecastData.city.timezone;
+        const timezoneOffset = forecastData.city.timezone;
 
-          forecastData.list.forEach((forecast) => {
-            forecasts.push(new Forecast(forecast, timezoneOffset));
-          });
-        },
-        (error) => {
-          console.log('❌ Open Weather - forecast API error.');
-          console.log(error);
-          success = false;
-        }
-      );
-  }
+        forecastData.list.forEach((forecast) => {
+          forecasts.push(new Forecast(forecast, timezoneOffset));
+        });
+      },
+      (error) => {
+        console.log('❌ Open Weather - forecast API error.');
+        console.log(error);
+        success = false;
+      }
+    );
 
   function logGeocodeData(geocodeData) {
     console.log('----- Geocode Data -----');
@@ -307,6 +311,32 @@ export default function Home({ data }) {
                 ></input>
               </div>
             </div>
+          </div>
+          <div className="data-box-container">
+            <DataBox
+              title="Humidity"
+              data={currentWeather.main.humidity}
+              unit="%"
+              icon="/images/humidity.png"
+            />
+            <DataBox
+              title="Cloudiness"
+              data={currentWeather.cloudiness}
+              unit="%"
+              icon="/images/clouds.png"
+            />
+            <DataBox
+              title="Pressure"
+              data={currentWeather.main.pressure}
+              unit=" hPa"
+              icon="/images/pressure.png"
+            />
+            <DataBox
+              title="Wind"
+              data={currentWeather.wind.speed}
+              unit="m/s"
+              icon="/images/wind.png"
+            />
           </div>
           <div className="temperature-chart-widget">
             <span className="title">Weekly Temperature</span>
