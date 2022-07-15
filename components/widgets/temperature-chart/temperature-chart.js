@@ -68,6 +68,7 @@ export default function TemperatureChart({ forecasts, temperatureScale }) {
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
     scales: {
       x: {
         ticks: {
