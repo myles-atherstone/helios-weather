@@ -2,12 +2,27 @@
 
 .sidebar {
   background: rgb(26, 49, 100); /* fallback for old browsers */
-  padding: 3rem;
+  padding: 3rem 3rem 0 3rem;
   position: relative;
 
   .content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-between;
     position: relative;
     z-index: 2;
+
+    .sidebar-bottom {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      justify-content: center;
+
+      .rain-widget {
+        margin-bottom: 5rem;
+      }
+    }
   }
 
   .radial-gradient-top {
@@ -17,11 +32,11 @@
       rgba(183, 205, 252, 0.527) 0%,
       rgba(255, 255, 255, 0) 60%
     );
-    position: absolute;
-    width: 100%;
     height: 100%;
-    top: 0;
     left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
   }
 
   .radial-gradient-bottom {
@@ -31,10 +46,10 @@
       rgb(54, 88, 161) 0%,
       rgba(255, 255, 255, 0) 60%
     );
-    position: absolute;
-    width: 100%;
     height: 100%;
-    top: 0;
     left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
   }
 }

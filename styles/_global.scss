@@ -28,7 +28,7 @@ a {
 main {
   display: grid;
   grid-template-columns: 65% 35%;
-  height: calc(100vh - vars.$footer-height);
+  min-height: calc(100vh);
   overflow: auto;
 }
 
