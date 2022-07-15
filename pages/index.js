@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import Sidebar from '../components/containers/sidebar/sidebar';
+import DateDisplay from '../components/widgets/date-display/date-display';
 import Location from '../components/widgets/location/location';
 import PrimaryWeather from '../components/widgets/primary-weather/primary-weather';
 import Rain from '../components/widgets/rain/rain';
@@ -282,20 +283,27 @@ export default function Home({ data }) {
         <div className="primary-view">
           <div className="date-search-widget">
             <div className="date-widget">
-              <h1>Welcome to Helios Weather!</h1>
+              <h1 className="app-name">Helios Weather</h1>
+              <DateDisplay
+                day={dateValues[2]}
+                month={dateValues[1]}
+                year={dateValues[0]}
+              />
             </div>
             <div className="search-widget">
-              <button
-                className="search-button"
-                onClick={handleClick}
-                aria-label="Search location"
-              ></button>
-              <input
-                className="search-box"
-                type="text"
-                onChange={handleLocationChange}
-                placeholder="Search location here"
-              ></input>
+              <div className="wrapper">
+                <button
+                  className="search-button"
+                  onClick={handleClick}
+                  aria-label="Search location"
+                ></button>
+                <input
+                  className="search-box"
+                  type="text"
+                  onChange={handleLocationChange}
+                  placeholder="Search location here"
+                ></input>
+              </div>
             </div>
           </div>
         </div>
