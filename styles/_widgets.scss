@@ -44,8 +44,8 @@
   .icon-toggle-container {
     align-items: center;
     display: flex;
-    justify-content: space-between;
     height: 60px;
+    justify-content: space-between;
 
     .icon-wrapper {
       img {
@@ -97,5 +97,71 @@
         font-size: 2.3rem;
       }
     }
+  }
+}
+
+.sun-widget {
+  color: vars.$white;
+  margin-top: 5rem;
+
+  .title {
+    display: block;
+    font-size: 2.3rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .sunbox-widget {
+    &:last-child {
+      margin-top: 1.25rem;
+    }
+  }
+}
+
+.sunbox-widget {
+  align-items: center;
+  background: vars.$off-white-transparent;
+  border: 1px solid vars.$off-white-transparent;
+  border-radius: 8px;
+  color: vars.$white;
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  transition: border 0.1s ease;
+
+  &:hover {
+    border: 1px solid vars.$primary;
+  }
+
+  .icon-time-container {
+    align-items: center;
+    display: flex;
+
+    .icon {
+      display: block;
+      margin-right: 2rem;
+    }
+
+    .type-time-container {
+      display: flex;
+      flex-direction: column;
+
+      .type {
+        color: vars.$off-white;
+      }
+
+      .time-container {
+        .time {
+          font-size: 2.9rem;
+        }
+
+        .period {
+          font-size: 3rem;
+        }
+      }
+    }
+  }
+
+  .time-to-in-container {
+    color: vars.$off-white;
   }
 }
