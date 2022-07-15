@@ -9,8 +9,6 @@ export default function PrimaryWeather({
   const [temperatureScale, setTemperatureScale] = useState('C');
 
   const kelvinToCelsius = (k) => {
-    console.log('KK', k);
-    console.log('KK', k - 273.15);
     return (k - 273.15).toFixed(0);
   };
 
