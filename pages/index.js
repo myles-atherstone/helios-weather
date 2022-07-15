@@ -5,6 +5,7 @@ import { useState } from 'react';
 import Sidebar from '../components/containers/sidebar/sidebar';
 import Location from '../components/widgets/location/location';
 import PrimaryWeather from '../components/widgets/primary-weather/primary-weather';
+import Rain from '../components/widgets/rain/rain';
 import Sun from '../components/widgets/sun/sun';
 import formatDate from '../util/dateHelper';
 
@@ -29,6 +30,7 @@ export async function getServerSideProps(context) {
   let success = true;
   let location;
   let currentWeather;
+  let forecasts = [];
 
   class Location {
     lat;
@@ -107,6 +109,22 @@ export async function getServerSideProps(context) {
     }
   }
 
+  class Forecast {
+    unixTime;
+    timezoneOffset;
+    main = {
+      temp: null,
+    };
+    rainChance;
+
+    constructor(forecastData, timezoneOffset) {
+      this.unixTime = forecastData.dt;
+      this.timezoneOffset = timezoneOffset;
+      this.main.temp = forecastData.main.temp;
+      this.rainChance = forecastData.pop;
+    }
+  }
+
   if (context.query.location) {
     console.log('Getting geocode data...');
 
@@ -119,7 +137,7 @@ export async function getServerSideProps(context) {
           console.log('✅ Geocode data received.');
 
           const geocodeData = response.data.data;
-          logGeocodeData(geocodeData);
+          // logGeocodeData(geocodeData);
 
           console.log('Validating geocode data...');
 
@@ -131,7 +149,7 @@ export async function getServerSideProps(context) {
             console.log('Getting weather data...');
 
             return axios.get(
-              `https://api.openweathermap.org/data/2.5/weather?lat=${geocodeData[0].latitude}&lon=${geocodeData[0].longitude}&appid=${process.env.OPEN_WEATHER_API_KEY}`
+              `https://api.openweathermap.org/data/2.5/weather?lat=${location.lat}&lon=${location.lon}&appid=${process.env.OPEN_WEATHER_API_KEY}`
             );
           } else {
             console.log('❌ Geocode data is invalid.');
@@ -156,13 +174,40 @@ export async function getServerSideProps(context) {
 
             const weatherData = response.data;
 
-            logWeatherData(weatherData);
+            // logWeatherData(weatherData);
 
             currentWeather = new CurrentWeather(weatherData);
+
+            console.log('Getting forecast data...');
+
+            return axios.get(
+              `https://api.openweathermap.org/data/2.5/forecast?lat=${location.lat}&lon=${location.lon}&appid=${process.env.OPEN_WEATHER_API_KEY}`
+            );
           }
         },
         (error) => {
-          console.log('❌ Open weather error.');
+          console.log('❌ Open Weather - weather API error.');
+          console.log(error);
+          success = false;
+        }
+      )
+      .then(
+        (response) => {
+          console.log('✅ Forecast data received.');
+
+          const forecastData = response.data;
+
+          // console.log('----- Forecast Data -----');
+          // console.log(response.data);
+
+          const timezoneOffset = forecastData.city.timezone;
+
+          forecastData.list.forEach((forecast) => {
+            forecasts.push(new Forecast(forecast, timezoneOffset));
+          });
+        },
+        (error) => {
+          console.log('❌ Open Weather - forecast API error.');
           console.log(error);
           success = false;
         }
@@ -184,6 +229,7 @@ export async function getServerSideProps(context) {
     locationValid: locationValid,
     location: JSON.stringify(location),
     currentWeather: JSON.stringify(currentWeather),
+    forecasts: JSON.stringify(forecasts),
   };
 
   return {
@@ -196,6 +242,8 @@ export default function Home({ data }) {
   const locationValid = data.locationValid;
   const location = JSON.parse(data.location);
   const currentWeather = JSON.parse(data.currentWeather);
+  const forecasts = JSON.parse(data.forecasts);
+  console.log(forecasts);
 
   const router = useRouter();
   const [locationInput, setLocationInput] = useState('');
@@ -216,8 +264,8 @@ export default function Home({ data }) {
 
   const locationInvalidMessage = 'Location not found. Please try again.';
 
-  console.log('Current Weather', currentWeather);
-  console.log('Location', location);
+  // console.log('Current Weather', currentWeather);
+  // console.log('Location', location);
 
   return (
     <div>
@@ -238,26 +286,31 @@ export default function Home({ data }) {
         </div>
 
         <Sidebar>
-          <Location
-            name={location.locationName}
-            region={location.region}
-            country={location.country}
-            hours={dateValues[3]}
-            minutes={dateValues[4]}
-            period={dateValues[7]}
-          />
-          <PrimaryWeather
-            temperature={currentWeather.main.temp}
-            weatherMain={currentWeather.weather.main}
-            weatherDescription={currentWeather.weather.description}
-            icon={currentWeather.weather.icon}
-          />
-          <Sun
-            sunriseTime={currentWeather.sun.sunrise}
-            sunsetTime={currentWeather.sun.sunset}
-            currentDate={currentDate}
-            timezoneOffset={currentWeather.timezoneOffset}
-          />
+          <div className="sidebar-top">
+            <Location
+              name={location.locationName}
+              region={location.region}
+              country={location.country}
+              hours={dateValues[3]}
+              minutes={dateValues[4]}
+              period={dateValues[7]}
+            />
+            <PrimaryWeather
+              temperature={currentWeather.main.temp}
+              weatherMain={currentWeather.weather.main}
+              weatherDescription={currentWeather.weather.description}
+              icon={currentWeather.weather.icon}
+            />
+          </div>
+          <div className="sidebar-bottom">
+            <Rain forecasts={forecasts} displayNumber={4} />
+            <Sun
+              sunriseTime={currentWeather.sun.sunrise}
+              sunsetTime={currentWeather.sun.sunset}
+              currentDate={currentDate}
+              timezoneOffset={currentWeather.timezoneOffset}
+            />
+          </div>
         </Sidebar>
 
         {/* <p>
@@ -266,7 +319,7 @@ export default function Home({ data }) {
         */}
       </main>
 
-      <footer>
+      {/* <footer>
         <a
           href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
           target="_blank"
@@ -277,7 +330,7 @@ export default function Home({ data }) {
             <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
           </span>
         </a>
-      </footer>
+      </footer> */}
     </div>
   );
 }
